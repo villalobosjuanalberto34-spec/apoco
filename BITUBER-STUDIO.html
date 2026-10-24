@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0b0b12">
+<title>VOICE STUDIO</title>
+<style>
+:root{
+  --bg:#0b0b12;--s:#12121a;--s2:#1b1b26;--s3:#282836;--bd:#3a3a4e;
+  --t:#f3f3f8;--m:#9595ab;--a:#8b5cf6;--al:#c4b5fd;
+  --g:#34d399;--r:#f87171;--o:#fbbf24;--b:#60a5fa;
+  --rad:14px;--st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--t);font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif;font-size:14px;overflow:hidden}
+body{display:flex;flex-direction:column;height:100dvh}
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;padding-top:max(10px,var(--st));background:var(--s);border-bottom:1px solid var(--bd);flex-shrink:0}
+.logo{font-weight:800;font-size:15px}.logo b{color:var(--al)}
+.badge{font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;background:var(--s3);color:var(--m)}
+.badge.on{background:rgba(52,211,153,.18);color:var(--g)}
+.tabs{display:flex;background:var(--s);border-bottom:1px solid var(--bd);overflow-x:auto;flex-shrink:0}
+.tab{flex:1;min-width:62px;padding:11px 4px;border:none;background:none;color:var(--m);font-weight:700;font-size:11px;border-bottom:3px solid transparent}
+.tab.active{color:var(--al);border-bottom-color:var(--a)}
+.main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:calc(18px + var(--sb))}
+.panel{display:none;padding:12px}.panel.active{display:block}
+.st{font-size:10px;font-weight:700;color:var(--m);text-transform:uppercase;letter-spacing:.5px;margin:14px 0 8px}
+.st:first-child{margin-top:0}
+.row{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.btn{flex:1;min-width:0;height:48px;border:none;border-radius:var(--rad);font-weight:700;font-size:12px;display:flex;align-items:center;justify-content:center}
+.btn:active{opacity:.88}.btn:disabled{opacity:.35;pointer-events:none}
+.btn-a{background:var(--a);color:#fff}.btn-d{background:var(--s2);color:var(--t);border:1px solid var(--bd)}
+.btn-g{background:var(--g);color:#0a0a12}.btn-r{background:var(--r);color:#0a0a12}
+.btn-o{background:transparent;color:var(--m);border:1px solid var(--bd)}
+.card{background:var(--s2);border:1px solid var(--bd);border-radius:var(--rad);padding:12px;margin-bottom:10px}
+.cr{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px}
+.cr .k{color:var(--m)}.cr .v{font-weight:700;max-width:58%;text-align:right;word-break:break-word}
+.sl{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.sl label{flex:0 0 100px;font-size:12px;color:var(--m)}
+.sl input[type=range]{flex:1;-webkit-appearance:none;height:5px;background:var(--bd);border-radius:3px}
+.sl input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--a)}
+.sl .val{width:44px;text-align:right;font-size:12px;font-weight:600}
+.voices{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}
+.voice{border-radius:14px;border:2px solid var(--bd);background:var(--s2);padding:14px 10px;cursor:pointer}
+.voice.active{border-color:var(--a);background:rgba(139,92,246,.14)}
+.voice .nm{font-size:13px;font-weight:700}.voice .ds{font-size:11px;color:var(--m);margin-top:3px;line-height:1.3}
+.wave{width:100%;height:64px;background:#0e0e16;border-radius:10px;margin:8px 0;display:block}
+.hint{font-size:12px;color:var(--m);line-height:1.45;margin-bottom:10px}
+.warn{background:rgba(251,191,36,.1);border:1px solid var(--o);border-radius:12px;padding:12px;font-size:12px;line-height:1.5;margin-bottom:12px}
+.err{background:rgba(248,113,113,.12);border:1px solid var(--r);border-radius:12px;padding:12px;font-size:12px;line-height:1.5;margin-bottom:12px;display:none}
+.err.show{display:block}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.chip{padding:8px 12px;border-radius:20px;border:1px solid var(--bd);background:var(--s2);font-size:11px;font-weight:700;color:var(--t)}
+.chip.on{border-color:var(--a);background:rgba(139,92,246,.2);color:var(--al)}
+.toast{position:fixed;bottom:calc(18px + var(--sb));left:50%;transform:translateX(-50%) translateY(120%);background:var(--s3);border:1px solid var(--bd);padding:12px 16px;border-radius:12px;font-size:12px;font-weight:600;z-index:99;max-width:90%;text-align:center;transition:transform .25s;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}.toast.ok{border-color:var(--g)}.toast.err{border-color:var(--r)}
+.timeline{height:8px;background:var(--bd);border-radius:4px;position:relative;margin:10px 0}
+.timeline .fill{height:100%;background:var(--a);border-radius:4px;width:0%}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+</style>
+</head>
+<body>
+<header class="hdr">
+  <div class="logo">VOICE <b>STUDIO</b></div>
+  <div class="badge" id="badge">Listo</div>
+</header>
+<nav class="tabs">
+  <button type="button" class="tab active" data-tab="voz">Mi voz</button>
+  <button type="button" class="tab" data-tab="pista">Pista</button>
+  <button type="button" class="tab" data-tab="editor">Editor</button>
+  <button type="button" class="tab" data-tab="export">Exportar</button>
+</nav>
+<div class="main">
+
+<!-- MI VOZ -->
+<div class="panel active" id="panel-voz">
+  <div class="warn">
+    <b>Mic en Koder:</b> si te saca de la app, usa <b>Importar voz</b>.
+    El mic real funciona en <b>Safari + HTTPS</b>.
+  </div>
+  <div class="err" id="micErr"></div>
+
+  <div class="st">1. Traer tu voz</div>
+  <div class="row">
+    <button type="button" class="btn btn-g" id="btnImportVoice">IMPORTAR VOZ / VIDEO</button>
+  </div>
+  <div class="row">
+    <button type="button" class="btn btn-a" id="btnMic">ACTIVAR MIC</button>
+    <button type="button" class="btn btn-d" id="btnMicOff" disabled>CERRAR MIC</button>
+  </div>
+  <div class="row">
+    <button type="button" class="btn btn-r" id="btnRec" disabled>GRABAR</button>
+    <button type="button" class="btn btn-a" id="btnStop" disabled>DETENER</button>
+  </div>
+  <input type="file" id="voiceFile" accept="audio/*,video/*,.m4a,.mp3,.wav,.mp4,.mov" style="display:none">
+  <div class="card">
+    <div class="cr"><span class="k">Estado</span><span class="v" id="vozState">Sin voz</span></div>
+    <div class="cr"><span class="k">Duracion</span><span class="v" id="vozDur">—</span></div>
+  </div>
+  <canvas class="wave" id="waveVoz"></canvas>
+
+  <div class="st">2. Tipo de voz</div>
+  <div class="voices" id="voiceGrid"></div>
+  <p class="hint">
+    <b>Voz normal</b> = tu voz real sin cambiar tono.<br>
+    No se pueden clonar voces de artistas reales (Peso Pluma, Panter Belico, Tito Double P, etc.) sin derechos.
+    Hay estilos de procesamiento (grave regional, brillante, etc.), no imitaciones.
+  </p>
+
+  <div class="st">3. Limpieza de voz</div>
+  <div class="sl"><label>Quitar graves</label><input type="range" id="hp" min="20" max="300" step="10" value="80"><span class="val" id="vhp">80</span></div>
+  <div class="sl"><label>Quitar agudos</label><input type="range" id="lp" min="3000" max="16000" step="500" value="12000"><span class="val" id="vlp">12k</span></div>
+  <div class="sl"><label>Compresion</label><input type="range" id="comp" min="0" max="1" step="0.05" value="0.35"><span class="val" id="vcomp">0.35</span></div>
+  <div class="sl"><label>Reducir ruido</label><input type="range" id="noise" min="0" max="1" step="0.05" value="0.15"><span class="val" id="vnoise">0.15</span></div>
+  <div class="row">
+    <button type="button" class="btn btn-a" id="btnProcessVoz">APLICAR A MI VOZ</button>
+    <button type="button" class="btn btn-d" id="btnPlayVoz">OIR VOZ</button>
+  </div>
+</div>
+
+<!-- PISTA / CANCION -->
+<div class="panel" id="panel-pista">
+  <div class="st">Cargar cancion o video</div>
+  <div class="row">
+    <button type="button" class="btn btn-a" id="btnLoadSong">CARGAR AUDIO / VIDEO</button>
+  </div>
+  <input type="file" id="songFile" accept="audio/*,video/*,.mp3,.m4a,.wav,.mp4,.mov" style="display:none">
+  <div class="card">
+    <div class="cr"><span class="k">Archivo</span><span class="v" id="songName">Ninguno</span></div>
+    <div class="cr"><span class="k">Duracion</span><span class="v" id="songDur">—</span></div>
+    <div class="cr"><span class="k">Modo</span><span class="v" id="songMode">—</span></div>
+  </div>
+  <canvas class="wave" id="waveSong"></canvas>
+
+  <div class="st">Tratamiento de la pista</div>
+  <div class="chips" id="songChips">
+    <button type="button" class="chip on" data-mode="full">Cancion completa</button>
+    <button type="button" class="chip" data-mode="karaoke">Quitar voz (karaoke)</button>
+    <button type="button" class="chip" data-mode="center">Solo centro</button>
+  </div>
+  <p class="hint">Karaoke = resta canales L−R (aproximado, estereo). Mejor calidad que antes: se normaliza y se evita distorsion.</p>
+
+  <div class="st">Cortes de la pista (como CapCut basico)</div>
+  <div class="sl"><label>Inicio (s)</label><input type="range" id="cutIn" min="0" max="0" step="0.1" value="0"><span class="val" id="vcutIn">0</span></div>
+  <div class="sl"><label>Fin (s)</label><input type="range" id="cutOut" min="0" max="0" step="0.1" value="0"><span class="val" id="vcutOut">0</span></div>
+  <div class="row">
+    <button type="button" class="btn btn-a" id="btnApplyCut" disabled>APLICAR CORTE</button>
+    <button type="button" class="btn btn-d" id="btnPlaySong" disabled>OIR PISTA</button>
+  </div>
+</div>
+
+<!-- EDITOR MEZCLA -->
+<div class="panel" id="panel-editor">
+  <div class="st">Mezcla profesional voz + pista</div>
+  <p class="hint">Aqui se combina tu voz procesada con la cancion. Ganancias separadas, EQ, side/ducking suave y fades para que no suene “roto”.</p>
+
+  <div class="st">Volumenes</div>
+  <div class="sl"><label>Vol. pista</label><input type="range" id="volMusic" min="0" max="1.5" step="0.05" value="0.55"><span class="val" id="vvolMusic">0.55</span></div>
+  <div class="sl"><label>Vol. voz</label><input type="range" id="volVoice" min="0" max="1.5" step="0.05" value="1.0"><span class="val" id="vvolVoice">1.00</span></div>
+  <div class="sl"><label>Entrada voz</label><input type="range" id="voiceStart" min="0" max="120" step="0.1" value="0"><span class="val" id="vvoiceStart">0</span></div>
+
+  <div class="st">EQ pista</div>
+  <div class="sl"><label>Graves</label><input type="range" id="bass" min="-12" max="12" step="1" value="2"><span class="val" id="vbass">2</span></div>
+  <div class="sl"><label>Medios</label><input type="range" id="mid" min="-12" max="12" step="1" value="-2"><span class="val" id="vmid">-2</span></div>
+  <div class="sl"><label>Agudos</label><input type="range" id="treble" min="-12" max="12" step="1" value="1"><span class="val" id="vtreble">1</span></div>
+
+  <div class="st">EQ voz</div>
+  <div class="sl"><label>Presencia</label><input type="range" id="pres" min="-6" max="12" step="1" value="4"><span class="val" id="vpres">4</span></div>
+  <div class="sl"><label>Aire</label><input type="range" id="air" min="-6" max="12" step="1" value="2"><span class="val" id="vair">2</span></div>
+
+  <div class="st">Espacio y dinamica</div>
+  <div class="sl"><label>Reverb voz</label><input type="range" id="vrev" min="0" max="0.6" step="0.05" value="0.12"><span class="val" id="vvrev">0.12</span></div>
+  <div class="sl"><label>Fade in/out</label><input type="range" id="fade" min="0" max="3" step="0.1" value="0.4"><span class="val" id="vfade">0.4</span></div>
+  <div class="sl"><label>Bajar pista al cantar</label><input type="range" id="duck" min="0" max="0.8" step="0.05" value="0.25"><span class="val" id="vduck">0.25</span></div>
+
+  <div class="row">
+    <button type="button" class="btn btn-g" id="btnRender">RENDER MEZCLA</button>
+  </div>
+  <canvas class="wave" id="waveMix"></canvas>
+  <div class="row">
+    <button type="button" class="btn btn-a" id="btnPlayMix" disabled>REPRODUCIR MEZCLA</button>
+    <button type="button" class="btn btn-d" id="btnStopAll">PARAR</button>
+  </div>
+</div>
+
+<!-- EXPORT -->
+<div class="panel" id="panel-export">
+  <div class="card">
+    <div class="cr"><span class="k">Voz</span><span class="v" id="exVoz">—</span></div>
+    <div class="cr"><span class="k">Pista</span><span class="v" id="exPista">—</span></div>
+    <div class="cr"><span class="k">Mezcla</span><span class="v" id="exMix">—</span></div>
+  </div>
+  <div class="row">
+    <button type="button" class="btn btn-g" id="btnShareMix">COMPARTIR / GUARDAR MEZCLA</button>
+  </div>
+  <div class="row">
+    <button type="button" class="btn btn-a" id="btnShareVoz">EXPORTAR SOLO VOZ</button>
+    <button type="button" class="btn btn-d" id="btnSharePista">EXPORTAR PISTA</button>
+  </div>
+  <p class="hint">Se exporta WAV de calidad. En iPhone usa Compartir → Guardar en Archivos / WhatsApp / Drive.</p>
+</div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+window.onerror = function (msg, s, line) {
+  try {
+    var t = document.getElementById("toast");
+    t.textContent = "Error: " + msg + " L" + line;
+    t.className = "toast show err";
+  } catch (e) {}
+  return true;
+};
+
+(function () {
+  "use strict";
+  function $(id) { return document.getElementById(id); }
+  function toast(m, t) {
+    var e = $("toast");
+    e.textContent = m;
+    e.className = "toast show " + (t || "");
+    clearTimeout(e._t);
+    e._t = setTimeout(function () { e.classList.remove("show"); }, 2800);
+  }
+  function badge(t, c) { $("badge").textContent = t; $("badge").className = "badge " + (c || ""); }
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+
+  // Voces: normal + estilos (NO clones de artistas)
+  var VOICES = [
+    { id: "normal", name: "Voz normal", desc: "Tu voz real, sin cambiar tono", pitch: 1, color: "#34d399" },
+    { id: "grave", name: "Grave", desc: "Mas profundo", pitch: 0.82, color: "#60a5fa" },
+    { id: "agudo", name: "Agudo", desc: "Mas alto", pitch: 1.28, color: "#fbbf24" },
+    { id: "regional", name: "Estilo regional", desc: "Procesado estilo corridos (no es ningun artista)", pitch: 0.92, color: "#f87171", presence: 6, air: 3 },
+    { id: "radio", name: "Radio / llamada", desc: "Banda estrecha", pitch: 1.05, color: "#c4b5fd", narrow: true },
+    { id: "suave", name: "Suave", desc: "Calido y limpio", pitch: 1.0, color: "#a78bfa", soft: true }
+  ];
+
+  var S = {
+    voiceId: "normal",
+    ctx: null,
+    micStream: null,
+    analyser: null,
+    micSource: null,
+    rec: null,
+    chunks: [],
+    recording: false,
+    // voice
+    rawVoice: null,
+    voiceBuf: null,
+    voiceBlob: null,
+    // song
+    rawSong: null,
+    songBuf: null,
+    songWork: null,
+    songMode: "full",
+    songName: "",
+    // mix
+    mixBuf: null,
+    mixBlob: null,
+    playing: null,
+    meterRaf: 0
+  };
+
+  function ensureCtx() {
+    return new Promise(function (resolve, reject) {
+      try {
+        var AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return reject(new Error("Sin AudioContext"));
+        if (!S.ctx) S.ctx = new AC();
+        if (S.ctx.state === "suspended") {
+          S.ctx.resume().then(function () { resolve(S.ctx); }).catch(function () { resolve(S.ctx); });
+        } else resolve(S.ctx);
+      } catch (e) { reject(e); }
+    });
+  }
+
+  function decodeFile(file) {
+    return ensureCtx().then(function (ctx) {
+      return file.arrayBuffer().then(function (ab) {
+        return ctx.decodeAudioData(ab.slice(0));
+      });
+    });
+  }
+
+  /** High quality offline render helpers */
+  function copyChannel(src, dst, srcOffset, dstOffset, count) {
+    var n = Math.min(count, src.length - srcOffset, dst.length - dstOffset);
+    for (var i = 0; i < n; i++) dst[dstOffset + i] += src[srcOffset + i];
+  }
+
+  function bufferToWav(buffer) {
+    var numCh = buffer.numberOfChannels;
+    var sr = buffer.sampleRate;
+    var len = buffer.length;
+    var dataSize = len * numCh * 2;
+    var ab = new ArrayBuffer(44 + dataSize);
+    var view = new DataView(ab);
+    function ws(o, s) { for (var i = 0; i < s.length; i++) view.setUint8(o + i, s.charCodeAt(i)); }
+    ws(0, "RIFF"); view.setUint32(4, 36 + dataSize, true); ws(8, "WAVE"); ws(12, "fmt ");
+    view.setUint32(16, 16, true); view.setUint16(20, 1, true); view.setUint16(22, numCh, true);
+    view.setUint32(24, sr, true); view.setUint32(28, sr * numCh * 2, true);
+    view.setUint16(32, numCh * 2, true); view.setUint16(34, 16, true);
+    ws(36, "data"); view.setUint32(40, dataSize, true);
+    var off = 44, ch = [], c, i, s;
+    for (c = 0; c < numCh; c++) ch.push(buffer.getChannelData(c));
+    for (i = 0; i < len; i++) {
+      for (c = 0; c < numCh; c++) {
+        s = clamp(ch[c][i], -1, 1);
+        view.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+        off += 2;
+      }
+    }
+    return new Blob([ab], { type: "audio/wav" });
+  }
+
+  function peakNormalize(buffer, target) {
+    target = target || 0.89;
+    var peak = 0, c, i, d, v;
+    for (c = 0; c < buffer.numberOfChannels; c++) {
+      d = buffer.getChannelData(c);
+      for (i = 0; i < d.length; i++) {
+        v = Math.abs(d[i]);
+        if (v > peak) peak = v;
+      }
+    }
+    if (peak < 1e-6) return buffer;
+    var g = target / peak;
+    for (c = 0; c < buffer.numberOfChannels; c++) {
+      d = buffer.getChannelData(c);
+      for (i = 0; i < d.length; i++) d[i] *= g;
+    }
+    return buffer;
+  }
+
+  function drawWave(canvas, buffer) {
+    var ctx = canvas.getContext("2d");
+    var w = canvas.width = Math.max(120, (canvas.clientWidth || 320) * (window.devicePixelRatio || 1));
+    var h = canvas.height = Math.max(48, (canvas.clientHeight || 64) * (window.devicePixelRatio || 1));
+    ctx.fillStyle = "#0e0e16";
+    ctx.fillRect(0, 0, w, h);
+    if (!buffer) return;
+    var data = buffer.getChannelData(0);
+    var step = Math.max(1, Math.ceil(data.length / w));
+    ctx.strokeStyle = "#8b5cf6";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (var x = 0; x < w; x++) {
+      var min = 1, max = -1, j, s;
+      for (j = 0; j < step; j++) {
+        s = data[x * step + j];
+        if (s === undefined) break;
+        if (s < min) min = s;
+        if (s > max) max = s;
+      }
+      ctx.moveTo(x, ((1 + min) / 2) * h);
+      ctx.lineTo(x, ((1 + max) / 2) * h);
+    }
+    ctx.stroke();
+  }
+
+  function playBuf(buffer) {
+    stopPlay();
+    if (!buffer) { toast("No hay audio", "err"); return; }
+    ensureCtx().then(function (ctx) {
+      var src = ctx.createBufferSource();
+      src.buffer = buffer;
+      var g = ctx.createGain();
+      g.gain.value = 1;
+      src.connect(g);
+      g.connect(ctx.destination);
+      src.onended = function () { if (S.playing === src) S.playing = null; };
+      src.start(0);
+      S.playing = src;
+    });
+  }
+  function stopPlay() {
+    if (S.playing) {
+      try { S.playing.stop(); } catch (e) {}
+      S.playing = null;
+    }
+  }
+
+  /* ── Process voice with quality chain ── */
+  function processVoice() {
+    if (!S.rawVoice) { toast("Importa o graba voz", "err"); return Promise.resolve(); }
+    return ensureCtx().then(function (ctx) {
+      var v = null;
+      for (var i = 0; i < VOICES.length; i++) if (VOICES[i].id === S.voiceId) v = VOICES[i];
+      if (!v) v = VOICES[0];
+
+      var pitch = v.pitch || 1;
+      var srcDur = S.rawVoice.duration;
+      var outDur = srcDur / pitch;
+      var sr = ctx.sampleRate;
+      var offline = new OfflineAudioContext(1, Math.max(1, Math.ceil(outDur * sr)), sr);
+
+      var src = offline.createBufferSource();
+      src.buffer = S.rawVoice;
+      src.playbackRate.value = pitch;
+
+      // noise gate-ish: soft expand via dynamics not available offline easily → highpass noise
+      var hp = offline.createBiquadFilter();
+      hp.type = "highpass";
+      hp.frequency.value = parseFloat($("hp").value);
+      hp.Q.value = 0.7;
+
+      var lp = offline.createBiquadFilter();
+      lp.type = "lowpass";
+      lp.frequency.value = parseFloat($("lp").value);
+      lp.Q.value = 0.7;
+
+      // presence / air
+      var pres = offline.createBiquadFilter();
+      pres.type = "peaking";
+      pres.frequency.value = 2800;
+      pres.Q.value = 1.1;
+      pres.gain.value = (v.presence != null ? v.presence : 0) + parseFloat($("pres") ? 0 : 0);
+
+      // use editor presence if exists — for voice panel we use fixed boost for regional
+      if (v.presence) pres.gain.value = v.presence;
+      else if (v.soft) pres.gain.value = 2;
+      else pres.gain.value = 3;
+
+      var air = offline.createBiquadFilter();
+      air.type = "highshelf";
+      air.frequency.value = 7000;
+      air.gain.value = v.air != null ? v.air : (v.soft ? 1 : 2);
+
+      if (v.narrow) {
+        hp.frequency.value = Math.max(hp.frequency.value, 300);
+        lp.frequency.value = Math.min(lp.frequency.value, 3500);
+      }
+
+      // simple compressor approximation: waveshaper soft knee
+      var compAmt = parseFloat($("comp").value);
+      var shaper = offline.createWaveShaper();
+      shaper.curve = makeSoftComp(compAmt);
+      shaper.oversample = "2x";
+
+      // noise reduction light: extra low volume soft gate via gain curve not perfect
+      var noiseG = offline.createGain();
+      noiseG.gain.value = 1 - parseFloat($("noise").value) * 0.15;
+
+      var master = offline.createGain();
+      master.gain.value = 0.95;
+
+      src.connect(hp);
+      hp.connect(lp);
+      lp.connect(pres);
+      pres.connect(air);
+      air.connect(shaper);
+      shaper.connect(noiseG);
+      noiseG.connect(master);
+      master.connect(offline.destination);
+      src.start(0);
+
+      return offline.startRendering().then(function (rendered) {
+        peakNormalize(rendered, 0.88);
+        S.voiceBuf = rendered;
+        S.voiceBlob = bufferToWav(rendered);
+        drawWave($("waveVoz"), rendered);
+        $("vozState").textContent = v.name;
+        $("vozDur").textContent = rendered.duration.toFixed(2) + " s";
+        $("exVoz").textContent = v.name + " · " + rendered.duration.toFixed(1) + "s";
+        toast("Voz lista: " + v.name, "ok");
+      });
+    });
+  }
+
+  function makeSoftComp(amount) {
+    var n = 44100, curve = new Float32Array(n), k = 1 + amount * 12, i, x;
+    for (i = 0; i < n; i++) {
+      x = (i * 2) / n - 1;
+      curve[i] = Math.tanh(x * k) / Math.tanh(k);
+    }
+    return curve;
+  }
+
+  /* ── Song modes with normalize ── */
+  function buildSongWork() {
+    if (!S.rawSong) return null;
+    var buf = S.rawSong;
+    var mode = S.songMode;
+    var out;
+    if (mode === "karaoke" && buf.numberOfChannels >= 2) {
+      out = S.ctx.createBuffer(2, buf.length, buf.sampleRate);
+      var L = buf.getChannelData(0), R = buf.getChannelData(1);
+      var oL = out.getChannelData(0), oR = out.getChannelData(1);
+      for (var i = 0; i < buf.length; i++) {
+        var side = (L[i] - R[i]) * 0.707;
+        oL[i] = side;
+        oR[i] = -side;
+      }
+    } else if (mode === "center" && buf.numberOfChannels >= 2) {
+      out = S.ctx.createBuffer(1, buf.length, buf.sampleRate);
+      var L2 = buf.getChannelData(0), R2 = buf.getChannelData(1);
+      var o = out.getChannelData(0);
+      for (var j = 0; j < buf.length; j++) o[j] = (L2[j] + R2[j]) * 0.5;
+    } else {
+      // clone full
+      out = S.ctx.createBuffer(buf.numberOfChannels, buf.length, buf.sampleRate);
+      for (var c = 0; c < buf.numberOfChannels; c++) {
+        out.getChannelData(c).set(buf.getChannelData(c));
+      }
+    }
+    peakNormalize(out, 0.85);
+    return out;
+  }
+
+  function applyCut() {
+    if (!S.songWork && !S.rawSong) return;
+    ensureCtx().then(function () {
+      var src = S.songWork || buildSongWork();
+      if (!src) return;
+      var t0 = parseFloat($("cutIn").value);
+      var t1 = parseFloat($("cutOut").value);
+      if (t1 <= t0) { toast("Fin debe ser mayor que inicio", "err"); return; }
+      var sr = src.sampleRate;
+      var i0 = Math.floor(t0 * sr);
+      var i1 = Math.min(src.length, Math.floor(t1 * sr));
+      var len = i1 - i0;
+      if (len < 1) return;
+      var cut = S.ctx.createBuffer(src.numberOfChannels, len, sr);
+      for (var c = 0; c < src.numberOfChannels; c++) {
+        var s = src.getChannelData(c);
+        var d = cut.getChannelData(c);
+        for (var i = 0; i < len; i++) d[i] = s[i0 + i] || 0;
+      }
+      peakNormalize(cut, 0.88);
+      S.songWork = cut;
+      drawWave($("waveSong"), cut);
+      $("songDur").textContent = cut.duration.toFixed(2) + " s";
+      $("exPista").textContent = (S.songName || "pista") + " · " + cut.duration.toFixed(1) + "s";
+      toast("Corte aplicado", "ok");
+    });
+  }
+
+  /* ── Professional mix render ── */
+  function renderMix() {
+    var music = S.songWork || (S.rawSong ? buildSongWork() : null);
+    var voice = S.voiceBuf || S.rawVoice;
+    if (!music) { toast("Carga una pista", "err"); return; }
+    if (!voice) { toast("Importa o procesa tu voz", "err"); return; }
+
+    ensureCtx().then(function (ctx) {
+      var sr = ctx.sampleRate;
+      var voiceStart = parseFloat($("voiceStart").value);
+      var totalDur = Math.max(music.duration, voiceStart + voice.duration) + 0.2;
+      var len = Math.ceil(totalDur * sr);
+      var offline = new OfflineAudioContext(2, len, sr);
+
+      // MUSIC chain
+      var mSrc = offline.createBufferSource();
+      mSrc.buffer = music;
+      var mBass = offline.createBiquadFilter();
+      mBass.type = "lowshelf"; mBass.frequency.value = 120; mBass.gain.value = parseFloat($("bass").value);
+      var mMid = offline.createBiquadFilter();
+      mMid.type = "peaking"; mMid.frequency.value = 1200; mMid.Q.value = 0.9; mMid.gain.value = parseFloat($("mid").value);
+      var mTre = offline.createBiquadFilter();
+      mTre.type = "highshelf"; mTre.frequency.value = 6000; mTre.gain.value = parseFloat($("treble").value);
+      var mGain = offline.createGain();
+      var mVol = parseFloat($("volMusic").value);
+      var duck = parseFloat($("duck").value);
+      var fade = parseFloat($("fade").value);
+      // duck music while voice plays
+      var t0 = voiceStart;
+      var t1 = voiceStart + voice.duration;
+      mGain.gain.setValueAtTime(mVol, 0);
+      if (duck > 0.01) {
+        mGain.gain.setValueAtTime(mVol, Math.max(0, t0 - 0.15));
+        mGain.gain.linearRampToValueAtTime(mVol * (1 - duck), t0 + 0.1);
+        mGain.gain.setValueAtTime(mVol * (1 - duck), t1 - 0.1);
+        mGain.gain.linearRampToValueAtTime(mVol, t1 + 0.2);
+      }
+      // fade in/out music
+      if (fade > 0) {
+        mGain.gain.setValueAtTime(0.0001, 0);
+        mGain.gain.linearRampToValueAtTime(mVol * (duck > 0.01 && t0 < 0.5 ? (1 - duck) : 1), Math.min(fade, totalDur / 2));
+        var outStart = Math.max(0, music.duration - fade);
+        mGain.gain.setValueAtTime(mGain.gain.value, outStart);
+        mGain.gain.linearRampToValueAtTime(0.0001, music.duration);
+      }
+      mSrc.connect(mBass); mBass.connect(mMid); mMid.connect(mTre); mTre.connect(mGain); mGain.connect(offline.destination);
+      mSrc.start(0);
+
+      // VOICE chain
+      var vSrc = offline.createBufferSource();
+      vSrc.buffer = voice;
+      var vHp = offline.createBiquadFilter();
+      vHp.type = "highpass"; vHp.frequency.value = 70;
+      var vPres = offline.createBiquadFilter();
+      vPres.type = "peaking"; vPres.frequency.value = 3000; vPres.Q.value = 1; vPres.gain.value = parseFloat($("pres").value);
+      var vAir = offline.createBiquadFilter();
+      vAir.type = "highshelf"; vAir.frequency.value = 8000; vAir.gain.value = parseFloat($("air").value);
+      var vComp = offline.createWaveShaper();
+      vComp.curve = makeSoftComp(0.4);
+      var vGain = offline.createGain();
+      var vv = parseFloat($("volVoice").value);
+      vGain.gain.value = vv;
+      if (fade > 0) {
+        vGain.gain.setValueAtTime(0.0001, voiceStart);
+        vGain.gain.linearRampToValueAtTime(vv, voiceStart + Math.min(fade, 0.5));
+        var ve = voiceStart + voice.duration;
+        vGain.gain.setValueAtTime(vv, Math.max(voiceStart, ve - Math.min(fade, 0.5)));
+        vGain.gain.linearRampToValueAtTime(0.0001, ve);
+      }
+      // light reverb
+      var conv = offline.createConvolver();
+      var revWet = offline.createGain();
+      var revDry = offline.createGain();
+      var rv = parseFloat($("vrev").value);
+      conv.buffer = makeImpulse(offline, 1.1, rv);
+      revWet.gain.value = rv;
+      revDry.gain.value = 1 - rv * 0.35;
+
+      vSrc.connect(vHp); vHp.connect(vPres); vPres.connect(vAir); vAir.connect(vComp);
+      vComp.connect(revDry); vComp.connect(conv); conv.connect(revWet);
+      revDry.connect(vGain); revWet.connect(vGain);
+      vGain.connect(offline.destination);
+      vSrc.start(voiceStart);
+
+      toast("Renderizando mezcla HQ...", "ok");
+      badge("Render...");
+      return offline.startRendering();
+    }).then(function (rendered) {
+      peakNormalize(rendered, 0.92);
+      S.mixBuf = rendered;
+      S.mixBlob = bufferToWav(rendered);
+      drawWave($("waveMix"), rendered);
+      $("btnPlayMix").disabled = false;
+      $("exMix").textContent = rendered.duration.toFixed(1) + "s listo";
+      badge("Listo");
+      toast("Mezcla lista — deberia sonar mucho mejor", "ok");
+    }).catch(function (e) {
+      console.error(e);
+      toast("Error al renderizar", "err");
+      badge("Error");
+    });
+  }
+
+  function makeImpulse(ctx, duration, decay) {
+    var rate = ctx.sampleRate;
+    var len = Math.max(1, Math.floor(rate * (0.4 + duration * Math.max(0.05, decay))));
+    var buf = ctx.createBuffer(2, len, rate);
+    for (var c = 0; c < 2; c++) {
+      var d = buf.getChannelData(c);
+      for (var i = 0; i < len; i++) {
+        d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.8);
+      }
+    }
+    return buf;
+  }
+
+  function shareBlob(blob, name) {
+    if (!blob) { toast("Nada que exportar", "err"); return; }
+    var file = new File([blob], name, { type: blob.type || "audio/wav" });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      navigator.share({ files: [file], title: name }).then(function () {
+        toast("Compartido", "ok");
+      }).catch(function (e) {
+        if (e.name !== "AbortError") dl(blob, name);
+      });
+    } else dl(blob, name);
+  }
+  function dl(blob, name) {
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 3000);
+    toast("Descargado", "ok");
+  }
+
+  /* ── Mic safe ── */
+  function canMic() {
+    return !!(window.isSecureContext && navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+  }
+  function startMic() {
+    $("micErr").classList.remove("show");
+    $("btnMic").disabled = true;
+    if (!canMic()) {
+      $("btnMic").disabled = false;
+      $("micErr").textContent = "Sin mic en este visor (Koder/file). Usa IMPORTAR VOZ / VIDEO.";
+      $("micErr").classList.add("show");
+      toast("Usa Importar voz", "err");
+      return;
+    }
+    ensureCtx().then(function () {
+      return navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+    }).then(function (stream) {
+      S.micStream = stream;
+      S.micSource = S.ctx.createMediaStreamSource(stream);
+      S.analyser = S.ctx.createAnalyser();
+      S.analyser.fftSize = 256;
+      S.micSource.connect(S.analyser);
+      $("btnMicOff").disabled = false;
+      $("btnRec").disabled = false;
+      badge("MIC", "on");
+      toast("Mic listo", "ok");
+    }).catch(function (err) {
+      $("btnMic").disabled = false;
+      var msg = (err && err.message) || "No se pudo abrir el mic";
+      if (err && err.name === "NotAllowedError") msg = "Permiso denegado. En Koder usa Importar voz.";
+      $("micErr").textContent = msg;
+      $("micErr").classList.add("show");
+      toast(msg, "err");
+    });
+  }
+  function stopMic() {
+    try {
+      if (S.micStream) S.micStream.getTracks().forEach(function (t) { t.stop(); });
+    } catch (e) {}
+    S.micStream = null;
+    $("btnMic").disabled = false;
+    $("btnMicOff").disabled = true;
+    $("btnRec").disabled = true;
+    $("btnStop").disabled = true;
+    badge("Listo");
+  }
+  function startRec() {
+    if (!S.micStream) return;
+    S.chunks = [];
+    try {
+      var mime = MediaRecorder.isTypeSupported("audio/mp4") ? "audio/mp4" : "audio/webm";
+      S.rec = new MediaRecorder(S.micStream, { mimeType: mime });
+    } catch (e) {
+      try { S.rec = new MediaRecorder(S.micStream); } catch (e2) { toast("No se puede grabar", "err"); return; }
+    }
+    S.rec.ondataavailable = function (e) { if (e.data && e.data.size) S.chunks.push(e.data); };
+    S.rec.onstop = function () {
+      var blob = new Blob(S.chunks, { type: S.rec.mimeType || "audio/mp4" });
+      decodeFile(blob).then(function (buf) {
+        S.rawVoice = buf;
+        drawWave($("waveVoz"), buf);
+        $("vozDur").textContent = buf.duration.toFixed(2) + " s";
+        $("vozState").textContent = "Grabada (sin procesar)";
+        return processVoice();
+      }).catch(function () { toast("Error al leer grabacion", "err"); });
+    };
+    S.rec.start(200);
+    S.recording = true;
+    $("btnStop").disabled = false;
+    $("btnRec").disabled = true;
+    badge("REC");
+    toast("Grabando...", "ok");
+  }
+  function stopRec() {
+    if (!S.recording) return;
+    S.recording = false;
+    try { S.rec.stop(); } catch (e) {}
+    $("btnStop").disabled = true;
+    $("btnRec").disabled = !S.micStream;
+    badge("MIC", "on");
+  }
+
+  function loadMediaAsAudio(file, kind) {
+    // video or audio → decode audio track when possible
+    toast("Cargando...", "ok");
+    decodeFile(file).then(function (buf) {
+      if (kind === "voice") {
+        S.rawVoice = buf;
+        drawWave($("waveVoz"), buf);
+        $("vozDur").textContent = buf.duration.toFixed(2) + " s";
+        $("vozState").textContent = "Importada";
+        processVoice();
+      } else {
+        S.rawSong = buf;
+        S.songName = file.name;
+        S.songWork = null;
+        $("songName").textContent = file.name.length > 28 ? file.name.slice(0, 26) + "…" : file.name;
+        $("songDur").textContent = buf.duration.toFixed(2) + " s";
+        $("songMode").textContent = "Completa";
+        $("cutIn").max = buf.duration;
+        $("cutOut").max = buf.duration;
+        $("cutOut").value = buf.duration;
+        $("vcutIn").textContent = "0";
+        $("vcutOut").textContent = buf.duration.toFixed(1);
+        $("voiceStart").max = Math.ceil(buf.duration);
+        ensureCtx().then(function () {
+          S.songWork = buildSongWork();
+          drawWave($("waveSong"), S.songWork || buf);
+        });
+        $("btnApplyCut").disabled = false;
+        $("btnPlaySong").disabled = false;
+        $("exPista").textContent = S.songName;
+        toast("Pista cargada", "ok");
+      }
+    }).catch(function (e) {
+      console.error(e);
+      toast("No se pudo leer el audio de ese archivo", "err");
+    });
+  }
+
+  // UI voices
+  function renderVoices() {
+    var g = $("voiceGrid");
+    var html = "";
+    for (var i = 0; i < VOICES.length; i++) {
+      var v = VOICES[i];
+      html += '<div class="voice' + (v.id === S.voiceId ? " active" : "") + '" data-id="' + v.id + '">' +
+        '<div class="nm">' + v.name + '</div><div class="ds">' + v.desc + '</div></div>';
+    }
+    g.innerHTML = html;
+    var nodes = g.querySelectorAll(".voice");
+    for (var j = 0; j < nodes.length; j++) {
+      nodes[j].onclick = function () {
+        S.voiceId = this.getAttribute("data-id");
+        renderVoices();
+        toast(S.voiceId === "normal" ? "Voz normal (tu voz real)" : "Estilo aplicado", "ok");
+      };
+    }
+  }
+
+  // tabs
+  var tabs = document.querySelectorAll(".tab");
+  for (var t = 0; t < tabs.length; t++) {
+    tabs[t].onclick = function () {
+      for (var i = 0; i < tabs.length; i++) tabs[i].classList.remove("active");
+      this.classList.add("active");
+      var panels = document.querySelectorAll(".panel");
+      for (var p = 0; p < panels.length; p++) panels[p].classList.remove("active");
+      $("panel-" + this.getAttribute("data-tab")).classList.add("active");
+    };
+  }
+
+  // bind sliders
+  function bindSl(id, vid, fmt) {
+    $(id).oninput = function () {
+      $(vid).textContent = fmt ? fmt(this.value) : this.value;
+    };
+  }
+  bindSl("hp", "vhp");
+  bindSl("lp", "vlp", function (v) { return (parseFloat(v) / 1000).toFixed(1) + "k"; });
+  bindSl("comp", "vcomp", function (v) { return parseFloat(v).toFixed(2); });
+  bindSl("noise", "vnoise", function (v) { return parseFloat(v).toFixed(2); });
+  bindSl("volMusic", "vvolMusic", function (v) { return parseFloat(v).toFixed(2); });
+  bindSl("volVoice", "vvolVoice", function (v) { return parseFloat(v).toFixed(2); });
+  bindSl("voiceStart", "vvoiceStart", function (v) { return parseFloat(v).toFixed(1); });
+  bindSl("bass", "vbass");
+  bindSl("mid", "vmid");
+  bindSl("treble", "vtreble");
+  bindSl("pres", "vpres");
+  bindSl("air", "vair");
+  bindSl("vrev", "vvrev", function (v) { return parseFloat(v).toFixed(2); });
+  bindSl("fade", "vfade", function (v) { return parseFloat(v).toFixed(1); });
+  bindSl("duck", "vduck", function (v) { return parseFloat(v).toFixed(2); });
+  $("cutIn").oninput = function () { $("vcutIn").textContent = parseFloat(this.value).toFixed(1); };
+  $("cutOut").oninput = function () { $("vcutOut").textContent = parseFloat(this.value).toFixed(1); };
+
+  // song mode chips
+  var chips = document.querySelectorAll("#songChips .chip");
+  for (var ci = 0; ci < chips.length; ci++) {
+    chips[ci].onclick = function () {
+      for (var i = 0; i < chips.length; i++) chips[i].classList.remove("on");
+      this.classList.add("on");
+      S.songMode = this.getAttribute("data-mode");
+      if (!S.rawSong) return;
+      ensureCtx().then(function () {
+        S.songWork = buildSongWork();
+        drawWave($("waveSong"), S.songWork);
+        $("songMode").textContent = S.songMode === "karaoke" ? "Sin voz" : S.songMode === "center" ? "Solo centro" : "Completa";
+        toast("Modo: " + $("songMode").textContent, "ok");
+      });
+    };
+  }
+
+  $("btnImportVoice").onclick = function () { $("voiceFile").click(); };
+  $("voiceFile").onchange = function () {
+    if (this.files && this.files[0]) loadMediaAsAudio(this.files[0], "voice");
+    this.value = "";
+  };
+  $("btnMic").onclick = startMic;
+  $("btnMicOff").onclick = stopMic;
+  $("btnRec").onclick = startRec;
+  $("btnStop").onclick = stopRec;
+  $("btnProcessVoz").onclick = function () { processVoice(); };
+  $("btnPlayVoz").onclick = function () { playBuf(S.voiceBuf || S.rawVoice); };
+
+  $("btnLoadSong").onclick = function () { $("songFile").click(); };
+  $("songFile").onchange = function () {
+    if (this.files && this.files[0]) loadMediaAsAudio(this.files[0], "song");
+    this.value = "";
+  };
+  $("btnApplyCut").onclick = applyCut;
+  $("btnPlaySong").onclick = function () { playBuf(S.songWork || S.rawSong); };
+
+  $("btnRender").onclick = renderMix;
+  $("btnPlayMix").onclick = function () { playBuf(S.mixBuf); };
+  $("btnStopAll").onclick = stopPlay;
+
+  $("btnShareMix").onclick = function () { shareBlob(S.mixBlob, "mezcla-voice-studio.wav"); };
+  $("btnShareVoz").onclick = function () { shareBlob(S.voiceBlob || null, "mi-voz.wav"); };
+  $("btnSharePista").onclick = function () {
+    if (!S.songWork && !S.rawSong) { toast("Sin pista", "err"); return; }
+    var b = S.songWork || S.rawSong;
+    shareBlob(bufferToWav(b), "pista.wav");
+  };
+
+  renderVoices();
+  if (!canMic()) {
+    $("micErr").textContent = "Este visor no permite mic. Usa IMPORTAR VOZ / VIDEO.";
+    $("micErr").classList.add("show");
+  }
+})();
+</script>
+</body>
+</html>
